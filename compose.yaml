@@ -18,8 +18,11 @@
 # simple send, a PayJoin or a CoinJoin. It needs network access (Electrum,
 # and the PayJoin receiver or the CoinJoin relay), so it is a separate
 # service the offline wallet stays out of, and it only starts with
-# `docker compose --profile sweep up -d`. With no destination set it makes no
-# connection at all.
+# `docker compose --profile sweep up -d`. With nothing to sweep to (no
+# destination, and in payjoin mode no URI file) it reads no key and makes no
+# connection. For payjoin, mount the URI file read-only from the host (see
+# the commented volume below): whoever can write it decides where the whole
+# balance goes.
 #
 # Every variable is passed through empty when unset, which the service treats
 # as unset. DEADHOP_ELECTRUM and DEADHOP_ADMINS (or DEADHOP_PUBLIC_INVOICING=true)
@@ -168,6 +171,8 @@ services:
       - cvmpay-wallet-public:/wallet-public:ro
       - deadhop-wallet-scan:/wallet-scan:ro
       - deadhop-sweeper:/state
+      # payjoin mode: the receiver's URI, written on the host for each sweep.
+      # - ./payjoin:/payjoin:ro    (and DEADHOP_WALLET_PAYJOIN_URI_FILE=/payjoin/uri)
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
