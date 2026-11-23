@@ -87,6 +87,9 @@ services:
       DEADHOP_RATE_REQUESTS_PER_KEY_PER_MIN: "${DEADHOP_RATE_REQUESTS_PER_KEY_PER_MIN:-}"
       DEADHOP_RATE_REQUESTS_PER_MIN: "${DEADHOP_RATE_REQUESTS_PER_MIN:-}"
       DEADHOP_DATA_DIR: /data
+      # The service writes the relays each key listens on here (relays.json),
+      # so that the dashboard follows relay changes made from the dashboard.
+      DEADHOP_PUBLIC_DIR: /public
       DEADHOP_XPUB_FILE: /wallet-public/account.xpub
     depends_on:
       wallet:
