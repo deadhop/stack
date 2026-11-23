@@ -12,6 +12,18 @@
 # phrase with `docker compose exec wallet deadhop wallet export`. Or set
 # DEADHOP_XPUB to your own wallet's account key and nothing is generated.
 #
+# Sweeping (opt-in): the `sweeper` service (deadhop-wallet) holds the funds
+# and, once the confirmed balance reaches DEADHOP_WALLET_THRESHOLD_SAT, moves
+# them to a fresh address of another wallet (DEADHOP_WALLET_DESTINATION) by a
+# simple send, a PayJoin or a CoinJoin. It needs network access (Electrum,
+# and the PayJoin receiver or the CoinJoin relay), so it is a separate
+# service the offline wallet stays out of, and it only starts with
+# `docker compose --profile sweep up -d`. With nothing to sweep to (no
+# destination, and in payjoin mode no URI file) it reads no key and makes no
+# connection. For payjoin, mount the URI file read-only from the host (see
+# the commented volume below): whoever can write it decides where the whole
+# balance goes.
+#
 # Every variable is passed through empty when unset, which the service treats
 # as unset. DEADHOP_ELECTRUM and DEADHOP_ADMINS (or DEADHOP_PUBLIC_INVOICING=true)
 # are required: without them the service exits with a message naming the
@@ -91,6 +103,8 @@ services:
       # so that the dashboard follows relay changes made from the dashboard.
       DEADHOP_PUBLIC_DIR: /public
       DEADHOP_XPUB_FILE: /wallet-public/account.xpub
+      # The address high-water mark, for the sweeper's scan.
+      DEADHOP_INDEX_FILE: /wallet-scan/next-index
     depends_on:
       wallet:
         condition: service_healthy
@@ -98,6 +112,7 @@ services:
       - cvmpay-data:/data
       - cvmpay-public:/public
       - cvmpay-wallet-public:/wallet-public:ro
+      - deadhop-wallet-scan:/wallet-scan
     # Healthy once the service has connected to its relays and is serving
     # (it writes server.pubkey into the data directory at that point).
     healthcheck:
@@ -113,6 +128,56 @@ services:
     mem_limit: 256m
     cpus: 1.0
     pids_limit: 128
+    labels:
+      - traefik.enable=false
+
+  sweeper:
+    profiles: ["sweep"]
+    build:
+      context: .
+      dockerfile: wallet/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      wallet:
+        condition: service_healthy
+    environment:
+      DEADHOP_XPUB: "${DEADHOP_XPUB:-}"
+      DEADHOP_NETWORK: "${DEADHOP_NETWORK:-bitcoin}"
+      DEADHOP_ELECTRUM: "${DEADHOP_ELECTRUM:-}"
+      DEADHOP_ELECTRUM_CERT_SHA256: "${DEADHOP_ELECTRUM_CERT_SHA256:-}"
+      DEADHOP_WALLET_MODE: "${DEADHOP_WALLET_MODE:-}"
+      DEADHOP_WALLET_DESTINATION: "${DEADHOP_WALLET_DESTINATION:-}"
+      DEADHOP_WALLET_THRESHOLD_SAT: "${DEADHOP_WALLET_THRESHOLD_SAT:-}"
+      DEADHOP_WALLET_MAX_FEE_RATE: "${DEADHOP_WALLET_MAX_FEE_RATE:-}"
+      DEADHOP_WALLET_FEE_TARGET_BLOCKS: "${DEADHOP_WALLET_FEE_TARGET_BLOCKS:-}"
+      DEADHOP_WALLET_MIN_CONFIRMATIONS: "${DEADHOP_WALLET_MIN_CONFIRMATIONS:-}"
+      DEADHOP_WALLET_POLL_SECS: "${DEADHOP_WALLET_POLL_SECS:-}"
+      DEADHOP_WALLET_GAP: "${DEADHOP_WALLET_GAP:-}"
+      DEADHOP_WALLET_PROXY: "${DEADHOP_WALLET_PROXY:-}"
+      DEADHOP_WALLET_PAYJOIN_URI_FILE: "${DEADHOP_WALLET_PAYJOIN_URI_FILE:-}"
+      DEADHOP_WALLET_PAYJOIN_CERT_SHA256: "${DEADHOP_WALLET_PAYJOIN_CERT_SHA256:-}"
+      DEADHOP_WALLET_COINJOIN_RELAY: "${DEADHOP_WALLET_COINJOIN_RELAY:-}"
+      DEADHOP_WALLET_COINJOIN_DENOMINATION_SAT: "${DEADHOP_WALLET_COINJOIN_DENOMINATION_SAT:-}"
+      DEADHOP_WALLET_COINJOIN_PEERS: "${DEADHOP_WALLET_COINJOIN_PEERS:-}"
+      DEADHOP_WALLET_COINJOIN_TIMEOUT_SECS: "${DEADHOP_WALLET_COINJOIN_TIMEOUT_SECS:-}"
+      DEADHOP_LOG: "${DEADHOP_LOG:-}"
+      DEADHOP_DATA_DIR: /wallet
+      DEADHOP_XPUB_FILE: /wallet-public/account.xpub
+      DEADHOP_INDEX_FILE: /wallet-scan/next-index
+      DEADHOP_WALLET_STATE_DIR: /state
+    volumes:
+      # The recovery phrase, read only: this service never creates or changes it.
+      - cvmpay-wallet:/wallet:ro
+      - cvmpay-wallet-public:/wallet-public:ro
+      - deadhop-wallet-scan:/wallet-scan:ro
+      - deadhop-sweeper:/state
+      # payjoin mode: the receiver's URI, written on the host for each sweep.
+      # - ./payjoin:/payjoin:ro    (and DEADHOP_WALLET_PAYJOIN_URI_FILE=/payjoin/uri)
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 128m
+    pids_limit: 64
     labels:
       - traefik.enable=false
 
@@ -154,3 +219,5 @@ volumes:
   cvmpay-public:
   cvmpay-wallet:
   cvmpay-wallet-public:
+  deadhop-wallet-scan:
+  deadhop-sweeper:
