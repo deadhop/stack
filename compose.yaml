@@ -134,8 +134,9 @@ services:
   sweeper:
     profiles: ["sweep"]
     build:
-      context: .
-      dockerfile: wallet/Dockerfile
+      # Cargo fetches the shared crates from deadhop/server while building,
+      # so this image builds only once that repository is public.
+      context: ./wallet
     restart: unless-stopped
     depends_on:
       wallet:
@@ -184,7 +185,7 @@ services:
 
   dashboard:
     build:
-      context: .
+      context: ./js
       dockerfile: dashboard/Dockerfile
     restart: unless-stopped
     depends_on:
