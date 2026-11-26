@@ -171,7 +171,7 @@ Walk the [production checklist](https://deadhop.run/docs/deployment.md) with the
 | Symptom | Fix |
 | --- | --- |
 | `deadhop` keeps restarting with "DEADHOP_ELECTRUM is required" or "set DEADHOP_ADMINS and/or DEADHOP_PUBLIC_INVOICING=true" | Set it in `.env` |
-| "server is on a different chain" | `DEADHOP_NETWORK` (default `bitcoin`) does not match the Electrum server |
+| "the Electrum server is on a different network than DEADHOP_NETWORK" | `DEADHOP_NETWORK` (default `bitcoin`) does not match the Electrum server |
 | Certificate refused | Re-read the fingerprint and compare it on the node |
 | Cannot reach Electrum at `127.0.0.1` | That is the container; use the host's LAN address |
 | `deadhop` not healthy after two minutes | No relay connected: check `DEADHOP_RELAYS`, the proxy, or `kill_switch` while Tor starts |
