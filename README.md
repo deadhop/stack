@@ -27,16 +27,16 @@ Requirements: Rust, Node 24, Docker, [`just`](https://github.com/casey/just).
 ```sh
 git clone https://github.com/deadhop/stack && cd stack
 just clone       # server/, js/, lnaddr/, wallet/ and relay/ next to these files (gitignored)
-(cd js && just install)
+just install     # the JavaScript workspace in js/
 just up          # regtest bitcoind + Fulcrum + private relay, a funded "miner" and a "merchant" wallet
 just server      # builds and runs deadhop on the stack; writes js/dashboard/public/config.json
-(cd js && just dashboard)   # http://127.0.0.1:4173
+just dashboard              # http://127.0.0.1:4173
 just pay <address> <sats>   # pay a regtest invoice from the miner wallet
 just down        # remove the stack and its chain data
 ```
 
 Each component's own gate runs in its checkout (`just check`), and its end-to-end tests
-find this stack through the folder layout: `(cd js && just e2e)`. The scripts read
+find this stack through the folder layout: `just e2e`. The scripts read
 `.env.local` here on every run (gitignored), for example `DEADHOP_ADMINS=npub1…` or
 `DOCKER_CONTEXT=orbstack`. The tutorial: [Try it on your machine](https://deadhop.run/docs/quickstart.html).
 

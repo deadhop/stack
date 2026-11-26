@@ -19,6 +19,18 @@ down:
 server:
     scripts/dev-server.sh
 
+# Install the JavaScript workspace in js/ (after `just clone`)
+install:
+    cd js && just install
+
+# Build the dashboard and serve it at http://127.0.0.1:4173 (after `just server` wrote its config)
+dashboard:
+    cd js && just dashboard
+
+# End-to-end payments on regtest (needs `just up` and `just server` running)
+e2e:
+    cd js && just e2e
+
 # Pay a regtest invoice: just pay <address> <sats> [blocks]
 pay address sats blocks="1":
     scripts/dev-pay.sh {{address}} {{sats}} {{blocks}}
