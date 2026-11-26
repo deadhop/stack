@@ -6,7 +6,7 @@ source "$(dirname "$0")/lib.sh"
 [ -s "$DEV_DIR/xpub" ] || { echo "run scripts/dev-up.sh first" >&2; exit 1; }
 
 if [ ! -s "$DEV_DIR/operator.nsec" ]; then
-  (cd "$ROOT/dashboard" && node scripts/keygen.mjs "$DEV_DIR/operator")
+  (cd "$ROOT/js/dashboard" && node scripts/keygen.mjs "$DEV_DIR/operator")
 fi
 
 (cd "$ROOT/server" && cargo build --release)
@@ -17,7 +17,7 @@ fi
   for _ in $(seq 1 100); do [ -s "$DEV_DIR/server/admin.pubkey" ] && break; sleep 0.2; done
   printf '{\n  "serverPubkey": "%s",\n  "adminPubkey": "%s",\n  "relays": ["%s"]\n}\n' \
     "$(cat "$DEV_DIR/server/server.pubkey")" "$(cat "$DEV_DIR/server/admin.pubkey")" "$RELAY_URL" \
-    > "$ROOT/dashboard/public/config.json"
+    > "$ROOT/js/dashboard/public/config.json"
 ) &
 
 export DEADHOP_NAME="${DEADHOP_NAME:-deadhop (regtest)}"
