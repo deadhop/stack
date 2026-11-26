@@ -129,6 +129,23 @@ and its relay has no authentication. Do not adapt `dev/docker-compose.yml` for p
 | [deadhop/site](https://github.com/deadhop/site) | https://deadhop.run and every component's docs |
 | [deadhop/brand](https://github.com/deadhop/brand) | Logo, icons, fonts |
 
+## Agent skills
+
+This repository ships [agent skills](https://deadhop.run/docs/skills.html) for Claude Code,
+Codex, Cursor and other agents that read `SKILL.md`:
+
+```sh
+npx skills add deadhop/stack
+```
+
+| Skill | Use it to |
+| --- | --- |
+| `deadhop-stack-deploy` | run deadhop in production with `compose.yaml`: `.env`, first start, recovery phrase, first address, dashboard, sweeper, updates |
+| `deadhop-stack-regtest` | run the local regtest stack: `just up`, `just server`, `just dashboard`, `just pay`, `just e2e` |
+
+Install one with `--skill <name>`. Every deadhop skill is listed on
+[Agent skills](https://deadhop.run/docs/skills.html).
+
 ## Contributing
 
 Changes to `compose.yaml` are changes to what every deployment runs: describe what an operator
