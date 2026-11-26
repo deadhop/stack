@@ -6,6 +6,9 @@
 # static, RPC accepts any source address (only the loopback port binding
 # protects it), the wallets are hot, the relay has no authentication, and the
 # Fulcrum and relay images are unpinned.
+# The project keeps the name it had when this file was deploy/docker-compose.yml,
+# so existing stacks (containers, chain data) carry on.
+name: deploy
 services:
   bitcoind:
     image: bitcoin/bitcoin:28.1

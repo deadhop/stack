@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Pay a regtest invoice from the miner wallet: dev-pay.sh <address> <sats> [blocks-to-mine]
 set -euo pipefail
+# shellcheck source=scripts/lib.sh
 source "$(dirname "$0")/lib.sh"
 address="$1"; sats="$2"; blocks="${3:-0}"
 [[ "$sats" =~ ^[0-9]+$ && "$blocks" =~ ^[0-9]+$ ]] || { echo "usage: dev-pay.sh <address> <sats> [blocks]" >&2; exit 1; }

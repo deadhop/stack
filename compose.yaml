@@ -1,5 +1,7 @@
 # Production deployment: the payment service, an offline wallet service and
-# the dashboard.
+# the dashboard. Docker builds each image from its repository on GitHub
+# (deadhop/server, deadhop/js, deadhop/wallet), so this file is all you need:
+#   docker compose up -d --build
 #
 # The payment service has no inbound port: it reaches out to Nostr relays and
 # to your Electrum server. It is watch-only and never holds a spending key.
@@ -32,7 +34,7 @@
 services:
   wallet:
     build:
-      context: ./server
+      context: https://github.com/deadhop/server.git#main
     command: ["wallet", "serve"]
     restart: unless-stopped
     network_mode: none
@@ -61,7 +63,7 @@ services:
 
   deadhop:
     build:
-      context: ./server
+      context: https://github.com/deadhop/server.git#main
     restart: unless-stopped
     environment:
       DEADHOP_RELAYS: "${DEADHOP_RELAYS:-wss://relay.contextvm.org,wss://nos.lol,wss://relay.damus.io}"
@@ -134,9 +136,9 @@ services:
   sweeper:
     profiles: ["sweep"]
     build:
-      # Cargo fetches the shared crates from deadhop/server (public) while
-      # building, at the commit wallet/Cargo.lock pins.
-      context: ./wallet
+      # Cargo fetches the shared crates from deadhop/server while building,
+      # at the commit deadhop/wallet's Cargo.lock pins.
+      context: https://github.com/deadhop/wallet.git#main
     restart: unless-stopped
     depends_on:
       wallet:
@@ -185,7 +187,7 @@ services:
 
   dashboard:
     build:
-      context: ./js
+      context: https://github.com/deadhop/js.git#main
       dockerfile: dashboard/Dockerfile
     restart: unless-stopped
     depends_on:

@@ -1,8 +1,20 @@
+# The variables are for the scripts that source this file.
+# shellcheck shell=bash disable=SC2034
 # Shared helpers for the local regtest development stack.
 # Everything these scripts create is private to the current user.
 umask 077
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COMPOSE="$ROOT/deploy/docker-compose.yml"
+STACK="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# ROOT is the folder that holds the components (server/, js/), data/dev and
+# .env.local: the deadhop workspace when this stack is its stack/ submodule,
+# otherwise this folder (where `just clone` puts them). DEADHOP_WORKSPACE wins.
+if [ -n "${DEADHOP_WORKSPACE:-}" ]; then
+  ROOT="$(cd "$DEADHOP_WORKSPACE" && pwd)"
+elif [ -f "$STACK/../.gitmodules" ] && [ -d "$STACK/../server" ]; then
+  ROOT="$(cd "$STACK/.." && pwd)"
+else
+  ROOT="$STACK"
+fi
+COMPOSE="$STACK/dev/docker-compose.yml"
 DEV_DIR="$ROOT/data/dev"
 RELAY_URL="ws://127.0.0.1:7777"
 ELECTRUM_ADDR="127.0.0.1:50001"

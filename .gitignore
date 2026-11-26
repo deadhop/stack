@@ -1,0 +1,15 @@
+# The components, when `just clone` puts them here
+/server/
+/js/
+/lnaddr/
+/wallet/
+/relay/
+
+# Local settings, secrets and the dev stack's state. Never commit.
+.env
+.env.*
+!.env.example
+*.local
+*.local.*
+/data/
+.DS_Store
