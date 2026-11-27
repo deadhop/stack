@@ -28,9 +28,11 @@
 #
 # Every variable is passed through empty when unset, which the service treats
 # as unset. DEADHOP_ELECTRUM and DEADHOP_ADMINS (or DEADHOP_PUBLIC_INVOICING=true)
-# are required: without them the service exits with a message naming the
-# missing variable and is restarted until they are set. The dashboard comes up
-# regardless.
+# are required. With none of them set and an empty data volume, the service
+# waits in setup mode (connected to nothing) and the dashboard shows a setup
+# page that ends with the .env to paste here. With only some set, or a wrong
+# value, it exits with a message naming the variable and is restarted until it
+# is fixed. The dashboard comes up regardless.
 services:
   wallet:
     build:
